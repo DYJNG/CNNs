@@ -2,12 +2,13 @@ from mxnet import gluon
 from mxnet import ndarray as nd
 from mxnet import autograd as ag
 import datetime
-%matplotlib inline
+#%matplotlib inline
 import matplotlib as mpl
 mpl.rcParams['figure.dpi'] = 120
 import matplotlib.pyplot as plt
+import numpy as np
 
-def train(net, train_data, valid_data, ctx, num_epoches, optimizer='adam', 
+def train(net, train_data, valid_data, ctx, num_epoches, softmax_cross_entropy, optimizer='adam', 
           lr=0.01, lr_decay=0.1, lr_period=50, momentum=0.9, weight_decay=0, 
           cost_peroid=10, print_cost=False):
     if optimizer == 'momentum':
@@ -37,7 +38,8 @@ def train(net, train_data, valid_data, ctx, num_epoches, optimizer='adam',
                 output = net(data)
                 loss = softmax_cross_entropy(output, label)
             loss.backward()
-            trainer.step(batch_size)
+            #trainer.step(batch_size)
+            trainer.step(len(data))
             train_acc += nd.mean(output.argmax(axis=1) == label).asscalar()
 #             train_loss += nd.mean(loss).asscalar()
             cur_loss = nd.mean(loss).asscalar()
@@ -48,7 +50,7 @@ def train(net, train_data, valid_data, ctx, num_epoches, optimizer='adam',
         cur_time = datetime.datetime.now()
         h, remainder = divmod((cur_time - pre_time).seconds, 3600)
         m, s = divmod(remainder, 60)
-        time_str = 'Time %02d:%02d:`%02d, ' % (h, m, s)
+        time_str = 'Time %02d:%02d:%02d, ' % (h, m, s)
         
         if valid_data is not None:
             valid_acc = 0
@@ -81,8 +83,9 @@ def train(net, train_data, valid_data, ctx, num_epoches, optimizer='adam',
         
     if print_cost:
         x_axis = np.linspace(0, num_epoches, len(train_costs), endpoint=True)
-        plt.semilogy(x_axis, train_costs)
-        plt.semilogy(x_axis, valid_costs)
+        l1, = plt.semilogy(x_axis, train_costs)
+        l2, = plt.semilogy(x_axis, valid_costs)
         plt.xlabel('epoch')
         plt.ylabel('loss')
+        plt.legend([l1, l2], ['train', 'valid'], loc='upper right')
         plt.show()
