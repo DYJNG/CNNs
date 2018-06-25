@@ -10,7 +10,7 @@ import numpy as np
 
 def train(net, train_data, valid_data, ctx, num_epoches, softmax_cross_entropy, optimizer='adam', 
           lr=0.01, lr_decay=0.1, lr_period=50, momentum=0.9, weight_decay=0, 
-          cost_peroid=10, print_cost=False):
+          cost_period=10, print_cost=False):
     if optimizer == 'momentum':
         trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate': lr, 
                                                               'momentum': momentum, 
@@ -74,7 +74,7 @@ def train(net, train_data, valid_data, ctx, num_epoches, softmax_cross_entropy, 
             epoch_str = 'Epoch %d, Train_loss: %s, Train_acc: %s, ' % (epoch+1, 
                                                                      corr_loss_train, 
                                                                      train_acc/len(train_data))
-        if print_cost and (epoch+1) % cost_peroid == 0:
+        if print_cost and (epoch+1) % cost_period == 0:
             train_costs.append(corr_loss_train)
 #             train_costs.append(train_loss/len(train_data))
             valid_costs.append(valid_loss/len(valid_data))
